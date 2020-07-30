@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Layout, PageHeader } from 'antd';
 import styled from 'styled-components';
 import ContactList from './ContactList';
@@ -11,11 +11,13 @@ const MainLayout = styled(Layout)`
 `;
 
 const InsideLayout = styled(Layout)`
-  width: 600px;
+  width: 700px;
 `;
 
 function MainPage() {
-  const [display, setDisplay] = React.useState('default'); //default, create
+  const [display, setDisplay] = useState('default'); // default, create
+  const [isEditing, setIsEditing] = useState(false);
+  const [currentRecord, setCurrentRecord] = useState(null); // trigger modes for create contact component
 
   const onAddNewClick = () => {
     setDisplay('create');
@@ -23,15 +25,30 @@ function MainPage() {
 
   const onCancelClick = () => {
     setDisplay('default');
+    if (isEditing) setIsEditing(false);
   };
+
+  useEffect(() => {
+    if (isEditing) setDisplay('create');
+  }, [isEditing]);
 
   return (
     <MainLayout>
       <InsideLayout>
         <PageHeader title="My Contacts" subTitle="React application" />
-        {display === 'default' && <ContactList onAddNewClick={onAddNewClick} />}
+        {display === 'default' && (
+          <ContactList
+            editingTrigger={setIsEditing}
+            setCurrentRecord={setCurrentRecord}
+            onAddNewClick={onAddNewClick}
+          />
+        )}
         {display === 'create' && (
-          <CreateContact onCancelClick={onCancelClick} />
+          <CreateContact
+            onCancelClick={onCancelClick}
+            isEditing={isEditing}
+            currentRecord={currentRecord}
+          />
         )}
       </InsideLayout>
     </MainLayout>

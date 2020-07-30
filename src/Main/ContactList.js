@@ -1,9 +1,27 @@
-import React from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { Table, Space, Button, Divider } from 'antd';
-import Context from './Context';
+import { ContactsContext } from './Context';
+import { useContacts } from './useContacts';
+import moment from 'moment';
 
-const ContactList = ({ onAddNewClick }) => {
-  const { contacts } = React.useContext(Context);
+const dateFormat = 'DD/MM/YYYY';
+
+const ContactList = ({ onAddNewClick, editingTrigger, setCurrentRecord }) => {
+  const [contacts, setContacts] = useContext(ContactsContext);
+  // const [currentContact, setCurrentContact] = useState(null);
+  // editingTrigger={setIsEditing}
+  // setCurrentRecord={setCurrentRecord}
+  const { deleteContact } = useContacts();
+
+  useEffect(() => {
+    let savedContacts = JSON.parse(localStorage.getItem('contacts'));
+    if (savedContacts) {
+      savedContacts.birthday = moment(savedContacts.birthday).format(
+        dateFormat,
+      );
+      setContacts(savedContacts);
+    }
+  }, []);
 
   const columns = [
     {
@@ -19,6 +37,33 @@ const ContactList = ({ onAddNewClick }) => {
     { title: 'Birthday', dataIndex: 'birthday', key: 'birthday' },
     { title: 'Gender', dataIndex: 'gender', key: 'gender' },
     { title: 'Relative?', dataIndex: 'isRelative', key: 'isRelative' },
+    {
+      title: 'Action',
+      key: 'action',
+      render: (text, record) => (
+        <Space size="middle">
+          <a
+            style={{ color: '#ffc069' }}
+            onClick={(e) => {
+              e.preventDefault();
+              setCurrentRecord(record);
+              editingTrigger(true);
+            }}
+          >
+            Update
+          </a>
+          <a
+            style={{ color: '#ff4d4f' }}
+            onClick={(e) => {
+              e.preventDefault();
+              deleteContact(record);
+            }}
+          >
+            Delete
+          </a>
+        </Space>
+      ),
+    },
   ];
 
   return (

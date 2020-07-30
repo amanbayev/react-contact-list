@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import {
   Form,
   Input,
@@ -9,24 +9,38 @@ import {
   Switch,
   message,
 } from 'antd';
-import Context from './Context';
+import { ContactsContext } from './Context';
+import { useContacts } from './useContacts';
+
+import moment from 'moment';
 
 const { Option } = Select;
+const dateFormat = 'DD/MM/YYYY';
 
-const CreateContact = ({ onCancelClick }) => {
+const CreateContact = ({ onCancelClick, currentRecord, isEditing }) => {
   const [form] = Form.useForm();
-  const { addNewContact } = React.useContext(Context);
+  const { createContact, updateContact } = useContacts();
+  const [contacts] = useContext(ContactsContext);
 
   const onFormFinish = (values) => {
-    values.isRelative = values.isRelative ? 'Yes' : 'No';
-    values.birthday = values.birthday.format(dateFormat);
-    values.gender = values.gender ? values.gender : 'male';
-    addNewContact(values);
+    values.key = contacts.length + 1;
+    isEditing ? updateContact(values, currentRecord) : createContact(values);
     onCancelClick();
-    message.success('Contact added!');
+    !isEditing
+      ? message.success('Contact added!')
+      : message.success('Contact saved!');
   };
 
-  const dateFormat = 'DD/MM/YYYY';
+  let defaultValues = {
+    name: null,
+    phone: null,
+    birthday: null,
+    gender: 'male',
+    isRelative: false,
+  };
+  if (isEditing && currentRecord) {
+    defaultValues = currentRecord;
+  }
 
   return (
     <Form form={form} onFinish={onFormFinish}>
@@ -39,23 +53,46 @@ const CreateContact = ({ onCancelClick }) => {
             message: 'Please input contact name',
           },
         ]}
+        initialValue={defaultValues.name}
       >
         <Input />
       </Form.Item>
-      <Form.Item name="birthday" label="Birthday">
+      <Form.Item
+        name="birthday"
+        label="Birthday"
+        rules={[
+          {
+            required: true,
+            message: 'Please pick birth date',
+          },
+        ]}
+        initialValue={
+          isEditing ? moment(defaultValues.birthday, dateFormat) : null
+        }
+      >
         <DatePicker format={dateFormat} />
       </Form.Item>
-      <Form.Item name="gender" label="Gender">
-        <Select defaultValue="male">
+      <Form.Item
+        name="gender"
+        label="Gender"
+        rules={[{ required: true }]}
+        initialValue={defaultValues.gender}
+      >
+        <Select>
           <Option value="male">Male</Option>
           <Option value="female">Female</Option>
         </Select>
       </Form.Item>
-      <Form.Item name="isRelative" label="Relative?">
-        <Switch defaultChecked={false} />
+      <Form.Item
+        name="isRelative"
+        label="Relative?"
+        // initialValue={defaultValues.isRelative}
+      >
+        <Switch defaultChecked={defaultValues.isRelative} />
       </Form.Item>
       <Form.Item
         name="phone"
+        initialValue={defaultValues.phone}
         label="Phone Number"
         rules={[
           {
@@ -69,7 +106,7 @@ const CreateContact = ({ onCancelClick }) => {
       <Form.Item>
         <Space>
           <Button type="primary" htmlType="submit">
-            Add Contact
+            {isEditing ? 'Save Contact' : 'Add Contact'}
           </Button>
           <Button type="primary" danger onClick={onCancelClick}>
             Cancel
