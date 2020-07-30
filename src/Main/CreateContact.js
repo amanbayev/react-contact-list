@@ -1,15 +1,32 @@
-import React from "react";
-import { Form, Input, Button, Space } from "antd";
-import Context from "./Context";
+import React from 'react';
+import {
+  Form,
+  Input,
+  Button,
+  Space,
+  DatePicker,
+  Select,
+  Switch,
+  message,
+} from 'antd';
+import Context from './Context';
+
+const { Option } = Select;
 
 const CreateContact = ({ onCancelClick }) => {
   const [form] = Form.useForm();
   const { addNewContact } = React.useContext(Context);
 
   const onFormFinish = (values) => {
+    values.isRelative = values.isRelative ? 'Yes' : 'No';
+    values.birthday = values.birthday.format(dateFormat);
+    values.gender = values.gender ? values.gender : 'male';
     addNewContact(values);
     onCancelClick();
+    message.success('Contact added!');
   };
+
+  const dateFormat = 'DD/MM/YYYY';
 
   return (
     <Form form={form} onFinish={onFormFinish}>
@@ -19,11 +36,23 @@ const CreateContact = ({ onCancelClick }) => {
         rules={[
           {
             required: true,
-            message: "Please input contact name",
+            message: 'Please input contact name',
           },
         ]}
       >
         <Input />
+      </Form.Item>
+      <Form.Item name="birthday" label="Birthday">
+        <DatePicker format={dateFormat} />
+      </Form.Item>
+      <Form.Item name="gender" label="Gender">
+        <Select defaultValue="male">
+          <Option value="male">Male</Option>
+          <Option value="female">Female</Option>
+        </Select>
+      </Form.Item>
+      <Form.Item name="isRelative" label="Relative?">
+        <Switch defaultChecked={false} />
       </Form.Item>
       <Form.Item
         name="phone"
@@ -31,7 +60,7 @@ const CreateContact = ({ onCancelClick }) => {
         rules={[
           {
             required: true,
-            message: "Please input phone number",
+            message: 'Please input phone number',
           },
         ]}
       >

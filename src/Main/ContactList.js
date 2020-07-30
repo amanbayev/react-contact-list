@@ -1,21 +1,24 @@
-import React from "react";
-import { Table, Space, Button, Divider } from "antd";
-import Context from "./Context";
+import React from 'react';
+import { Table, Space, Button, Divider } from 'antd';
+import Context from './Context';
 
 const ContactList = ({ onAddNewClick }) => {
   const { contacts } = React.useContext(Context);
 
   const columns = [
     {
-      title: "Name",
-      dataIndex: "name",
-      key: "name",
+      title: 'Name',
+      dataIndex: 'name',
+      key: 'name',
     },
     {
-      title: "Phone Number",
-      dataIndex: "phone",
-      key: "phone",
+      title: 'Phone Number',
+      dataIndex: 'phone',
+      key: 'phone',
     },
+    { title: 'Birthday', dataIndex: 'birthday', key: 'birthday' },
+    { title: 'Gender', dataIndex: 'gender', key: 'gender' },
+    { title: 'Relative?', dataIndex: 'isRelative', key: 'isRelative' },
   ];
 
   return (
